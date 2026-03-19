@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Market Intel — Generador de Investigaciones de Mercado</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0a0f;--surface:#12121a;--surface2:#1a1a26;
+  --border:rgba(255,255,255,0.07);--border-active:rgba(99,102,241,0.5);
+  --accent:#6366f1;--accent2:#a855f7;
+  --text:#f1f0f7;--text-muted:#6b6a85;--text-dim:#9998b5;
+  --green:#10b981;--red:#ef4444;
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
+
+/* BG */
+.bg-grid{position:fixed;inset:0;z-index:0;pointer-events:none;background-image:linear-gradient(rgba(99,102,241,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(99,102,241,0.03) 1px,transparent 1px);background-size:40px 40px;}
+.bg-glow{position:fixed;z-index:0;border-radius:50%;filter:blur(120px);pointer-events:none;opacity:0.22;}
+.glow-1{width:500px;height:500px;background:var(--accent);top:-200px;left:-100px;}
+.glow-2{width:400px;height:400px;background:var(--accent2);bottom:-150px;right:-100px;}
+
+/* APP SHELL */
+.app{position:relative;z-index:1;display:flex;min-height:100vh;}
+
+/* SIDEBAR */
+.sidebar{
+  width:255px;min-width:255px;background:var(--surface);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;padding:22px 0;
+  position:sticky;top:0;height:100vh;overflow-y:auto;transition:transform 0.28s ease;
+}
+.logo{padding:0 20px 22px;border-bottom:1px solid var(--border);margin-bottom:14px;}
+.logo-mark{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:16px;margin-bottom:9px;}
+.logo h1{font-family:'Syne',sans-serif;font-size:15px;font-weight:800;letter-spacing:-0.3px;}
+.logo p{font-size:11px;color:var(--text-muted);margin-top:2px;}
+.sidebar-section{padding:0 13px;margin-bottom:5px;}
+.sidebar-label{font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-muted);padding:0 8px;margin-bottom:5px;}
+.step-item{display:flex;align-items:center;gap:9px;padding:8px 9px;border-radius:8px;cursor:pointer;transition:all 0.15s;margin-bottom:2px;font-size:13px;color:var(--text-dim);}
+.step-item:hover{background:var(--surface2);color:var(--text);}
+.step-item.active{background:rgba(99,102,241,0.12);color:var(--text);}
+.step-dot{width:22px;height:22px;border-radius:6px;background:var(--surface2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;transition:all 0.15s;}
+.step-item.active .step-dot{background:var(--accent);border-color:var(--accent);color:#fff;}
+.step-item.done .step-dot{background:var(--green);border-color:var(--green);color:#fff;}
+.sidebar-divider{height:1px;background:var(--border);margin:13px 20px;}
+.history-list{padding:0 13px;}
+.history-item{padding:8px 9px;border-radius:8px;cursor:pointer;transition:background 0.15s;font-size:12px;color:var(--text-dim);}
+.history-item:hover{background:var(--surface2);color:var(--text);}
+.hist-name{font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.hist-date{font-size:10px;color:var(--text-muted);margin-top:2px;}
+.history-empty{font-size:12px;color:var(--text-muted);padding:8px 9px;}
+
+/* MAIN */
+.main{flex:1;display:flex;flex-direction:column;min-height:100vh;overflow-y:auto;}
+
+/* TOPBAR */
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:15px 28px;border-bottom:1px solid var(--border);position:sticky;top:0;background:rgba(10,10,15,0.92);backdrop-filter:blur(12px);z-index:10;gap:10px;}
+.topbar-left{display:flex;align-items:center;gap:10px;}
+.menu-btn{display:none;background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:20px;padding:4px;line-height:1;}
+.topbar-title{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--text-dim);}
+.status-pill{display:flex;align-items:center;gap:6px;padding:5px 12px;border-radius:20px;font-size:11px;font-weight:600;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.2);color:var(--green);white-space:nowrap;flex-shrink:0;}
+.status-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+
+/* FORM */
+.content{flex:1;padding:28px 28px 50px;max-width:800px;width:100%;}
+.form-header{margin-bottom:26px;}
+.form-header h2{font-family:'Syne',sans-serif;font-size:25px;font-weight:800;line-height:1.2;margin-bottom:7px;background:linear-gradient(135deg,var(--text) 40%,var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.form-header p{color:var(--text-dim);font-size:14px;line-height:1.6;}
+.form-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:22px;margin-bottom:13px;transition:border-color 0.2s;}
+.form-card:focus-within{border-color:var(--border-active);}
+.card-header{display:flex;align-items:center;gap:11px;margin-bottom:17px;}
+.card-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.card-icon.indigo{background:rgba(99,102,241,0.15);}
+.card-icon.purple{background:rgba(168,85,247,0.15);}
+.card-icon.cyan{background:rgba(6,182,212,0.15);}
+.card-icon.emerald{background:rgba(16,185,129,0.15);}
+.card-icon.amber{background:rgba(245,158,11,0.15);}
+.card-icon.red{background:rgba(239,68,68,0.1);}
+.card-title{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;}
+.card-desc{font-size:11px;color:var(--text-muted);margin-top:1px;}
+.field{margin-bottom:13px;}
+.field:last-child{margin-bottom:0;}
+label{display:block;font-size:12px;font-weight:500;color:var(--text-dim);margin-bottom:6px;letter-spacing:0.2px;}
+input[type="text"],input[type="password"],textarea,select{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:9px;padding:10px 13px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;transition:border-color 0.15s,box-shadow 0.15s;outline:none;-webkit-appearance:none;}
+input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(99,102,241,0.12);}
+input::placeholder,textarea::placeholder{color:var(--text-muted);}
+textarea{resize:vertical;line-height:1.6;}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:11px;}
+.chips-label{font-size:12px;font-weight:500;color:var(--text-dim);margin-bottom:7px;display:block;}
+.chips{display:flex;flex-wrap:wrap;gap:7px;}
+.chip{padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:var(--surface2);color:var(--text-dim);font-size:12px;font-weight:500;cursor:pointer;transition:all 0.15s;user-select:none;}
+.chip:hover{border-color:var(--accent);color:var(--text);}
+.chip.selected{background:rgba(99,102,241,0.15);border-color:var(--accent);color:var(--text);}
+.key-hint{background:rgba(99,102,241,0.06);border:1px solid rgba(99,102,241,0.15);border-radius:8px;padding:10px 13px;margin-top:8px;font-size:12px;color:var(--text-dim);line-height:1.5;}
+.key-hint a{color:var(--accent);}
+.submit-area{margin-top:22px;}
+.btn-generate{width:100%;padding:15px;border-radius:12px;border:none;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font-family:'Syne',sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:opacity 0.2s,transform 0.15s;display:flex;align-items:center;justify-content:center;gap:10px;}
+.btn-generate:hover{opacity:0.9;transform:translateY(-1px);}
+.btn-generate:active{transform:translateY(0);}
+.btn-generate:disabled{opacity:0.4;cursor:not-allowed;transform:none;}
+.error-box{display:none;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.3);border-radius:10px;padding:12px 15px;margin-bottom:12px;font-size:13px;color:#fca5a5;}
+.error-box.visible{display:block;}
+
+/* LOADING */
+.loading-overlay{display:none;position:fixed;inset:0;z-index:200;background:rgba(10,10,15,0.94);backdrop-filter:blur(8px);align-items:center;justify-content:center;flex-direction:column;padding:20px;}
+.loading-overlay.visible{display:flex;}
+.loading-ring{width:58px;height:58px;border-radius:50%;border:2px solid var(--border);border-top-color:var(--accent);border-right-color:var(--accent2);animation:spin 0.8s linear infinite;margin-bottom:20px;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-title{font-family:'Syne',sans-serif;font-size:17px;font-weight:700;margin-bottom:6px;text-align:center;}
+.loading-msg{font-size:13px;color:var(--text-muted);text-align:center;max-width:290px;line-height:1.5;}
+.loading-steps{margin-top:16px;display:flex;flex-direction:column;gap:6px;width:100%;max-width:300px;}
+.loading-step{display:flex;align-items:center;gap:9px;font-size:12px;color:var(--text-muted);padding:8px 12px;border-radius:8px;background:var(--surface);border:1px solid var(--border);transition:all 0.3s;}
+.loading-step.active{color:var(--text);border-color:var(--accent);background:rgba(99,102,241,0.08);}
+.loading-step.done{color:var(--green);border-color:rgba(16,185,129,0.3);}
+.step-check{font-size:13px;flex-shrink:0;}
+
+/* RESULT */
+.result-area{display:none;flex-direction:column;height:100vh;overflow:hidden;}
+.result-area.visible{display:flex;}
+
+/* DOWNLOAD BAR */
+.download-bar{
+  background:var(--surface);border-bottom:2px solid rgba(99,102,241,0.25);
+  padding:14px 24px;display:flex;align-items:center;justify-content:space-between;
+  gap:14px;flex-wrap:wrap;flex-shrink:0;
+}
+.dl-info{display:flex;align-items:center;gap:10px;}
+.dl-check{width:34px;height:34px;border-radius:9px;background:rgba(16,185,129,0.15);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
+.dl-name{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:220px;}
+.dl-sub{font-size:11px;color:var(--text-muted);}
+.dl-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+
+.btn-new{padding:9px 16px;border-radius:9px;border:1px solid var(--border);background:var(--surface2);color:var(--text-dim);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;gap:6px;white-space:nowrap;}
+.btn-new:hover{background:rgba(255,255,255,0.05);color:var(--text);border-color:rgba(255,255,255,0.15);}
+
+.btn-open{padding:9px 16px;border-radius:9px;border:1px solid var(--border);background:var(--surface2);color:var(--text-dim);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;gap:6px;white-space:nowrap;}
+.btn-open:hover{background:rgba(255,255,255,0.05);color:var(--text);border-color:rgba(255,255,255,0.15);}
+
+/* THE STAR — Download button */
+.btn-download{
+  padding:11px 24px;border-radius:10px;border:none;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  color:#fff;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;
+  cursor:pointer;transition:opacity 0.2s,transform 0.15s,box-shadow 0.2s;
+  display:flex;align-items:center;gap:8px;white-space:nowrap;
+  box-shadow:0 4px 20px rgba(99,102,241,0.35);
+}
+.btn-download:hover{opacity:0.92;transform:translateY(-2px);box-shadow:0 6px 28px rgba(99,102,241,0.45);}
+.btn-download:active{transform:translateY(0);}
+
+/* IFRAME */
+.result-iframe-wrap{flex:1;overflow:hidden;background:#fff;}
+.result-iframe-wrap iframe{width:100%;height:100%;border:none;display:block;}
+
+/* SIDEBAR OVERLAY */
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:90;}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+
+/* ═══════════════ RESPONSIVE ═══════════════ */
+@media(max-width:900px){
+  .sidebar{position:fixed;left:0;top:0;z-index:100;transform:translateX(-100%);height:100vh;}
+  .sidebar.open{transform:translateX(0);}
+  .sidebar-overlay.open{display:block;}
+  .menu-btn{display:block;}
+  .content{padding:20px 16px 50px;}
+  .topbar{padding:14px 16px;}
+}
+@media(max-width:640px){
+  .field-row{grid-template-columns:1fr;}
+  .form-header h2{font-size:21px;}
+  .download-bar{padding:12px 16px;flex-direction:column;align-items:stretch;}
+  .dl-actions{width:100%;flex-direction:column;}
+  .btn-download{width:100%;justify-content:center;font-size:15px;padding:13px 20px;order:-1;}
+  .btn-new,.btn-open{width:100%;justify-content:center;}
+  .dl-name{max-width:100%;}
+  .loading-steps{max-width:100%;}
+}
+@media(max-width:400px){
+  .topbar-title{display:none;}
+  .status-pill span:last-child{display:none;}
+}
+</style>
+</head>
+<body>
+
+<div class="bg-grid"></div>
+<div class="bg-glow glow-1"></div>
+<div class="bg-glow glow-2"></div>
+
+<div class="app">
+
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="logo">
+      <div class="logo-mark">📊</div>
+      <h1>Market Intel</h1>
+      <p>Generador IA de investigaciones</p>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Flujo</div>
+      <div class="step-item active" id="nav-1"><div class="step-dot" id="dot-1">1</div><span>Datos del cliente</span></div>
+      <div class="step-item" id="nav-2"><div class="step-dot" id="dot-2">2</div><span>Servicios y mercado</span></div>
+      <div class="step-item" id="nav-3"><div class="step-dot" id="dot-3">3</div><span>Configuración</span></div>
+      <div class="step-item" id="nav-4"><div class="step-dot" id="dot-4">4</div><span>Resultado</span></div>
+    </div>
+    <div class="sidebar-divider"></div>
+    <div class="sidebar-section"><div class="sidebar-label">Historial</div></div>
+    <div class="history-list" id="historyList">
+      <div class="history-empty">No hay investigaciones previas</div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- TOPBAR -->
+    <div class="topbar">
+      <div class="topbar-left">
+        <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+        <span class="topbar-title">Nueva Investigación de Mercado</span>
+      </div>
+      <div class="status-pill">
+        <div class="status-dot"></div>
+        <span>IA Conectada</span>
+      </div>
+    </div>
+
+    <!-- FORM VIEW -->
+    <div class="content" id="formView">
+      <div class="form-header">
+        <h2>Datos del cliente<br>para investigar 🔍</h2>
+        <p>Completa la información y la IA generará un informe profesional completo, listo para presentar.</p>
+      </div>
+
+      <!-- 1. CLIENTE -->
+      <div class="form-card">
+        <div class="card-header">
+          <div class="card-icon indigo">🏢</div>
+          <div><div class="card-title">Información del Cliente</div><div class="card-desc">Nombre, sector y ubicación</div></div>
+        </div>
+        <div class="field">
+          <label>Nombre del negocio / clínica / empresa *</label>
+          <input type="text" id="clientName" placeholder="Ej: Clínica de Implantes El Poblado">
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>Ciudad / Zona *</label>
+            <input type="text" id="clientCity" placeholder="Ej: Medellín — El Poblado">
+          </div>
+          <div class="field">
+            <label>Sector / Industria *</label>
+            <input type="text" id="clientSector" placeholder="Ej: Odontología estética">
+          </div>
+        </div>
+        <div class="field">
+          <label>Descripción breve del negocio</label>
+          <textarea id="clientDesc" rows="2" placeholder="Ej: Clínica especializada en implantes, ortodoncia y diseño de sonrisa. Atiende pacientes locales e internacionales."></textarea>
+        </div>
+      </div>
+
+      <!-- 2. SERVICIOS -->
+      <div class="form-card">
+        <div class="card-header">
+          <div class="card-icon purple">🎯</div>
+          <div><div class="card-title">Servicios / Productos a Investigar</div><div class="card-desc">Qué quieres analizar en el mercado</div></div>
+        </div>
+        <div class="field">
+          <label>Lista los servicios o productos (uno por línea) *</label>
+          <textarea id="services" rows="4" placeholder="Ortodoncia&#10;Diseño de sonrisa&#10;Implantes dentales&#10;Blanqueamiento dental"></textarea>
+        </div>
+        <div class="field">
+          <label>¿Servicio estrella o de mayor ticket?</label>
+          <input type="text" id="starService" placeholder="Ej: Implantes dentales — ticket promedio $5.000.000 COP">
+        </div>
+      </div>
+
+      <!-- 3. OBJETIVO -->
+      <div class="form-card">
+        <div class="card-header">
+          <div class="card-icon cyan">📣</div>
+          <div><div class="card-title">Objetivo de Marketing</div><div class="card-desc">Para qué usarás esta investigación</div></div>
+        </div>
+        <div class="field">
+          <span class="chips-label">Tipo de pauta / estrategia</span>
+          <div class="chips" id="pautaChips">
+            <div class="chip selected" data-val="Pauta local (Google Ads + Meta Ads)">📍 Pauta local</div>
+            <div class="chip" data-val="SEO y contenido">📝 SEO / Contenido</div>
+            <div class="chip" data-val="Pauta nacional">🇨🇴 Pauta nacional</div>
+            <div class="chip" data-val="Pauta internacional / turismo">✈️ Internacional</div>
+            <div class="chip" data-val="Email marketing">📧 Email</div>
+            <div class="chip" data-val="Estrategia de marca">🎨 Branding</div>
+          </div>
+        </div>
+        <div class="field">
+          <span class="chips-label">Canales principales</span>
+          <div class="chips" id="channelChips">
+            <div class="chip selected" data-val="Google Ads">Google Ads</div>
+            <div class="chip selected" data-val="Meta (Instagram + Facebook)">Meta Ads</div>
+            <div class="chip" data-val="TikTok Ads">TikTok</div>
+            <div class="chip" data-val="WhatsApp Business">WhatsApp</div>
+            <div class="chip" data-val="LinkedIn Ads">LinkedIn</div>
+            <div class="chip" data-val="YouTube Ads">YouTube</div>
+          </div>
+        </div>
+        <div class="field">
+          <label>Presupuesto mensual de pauta estimado (opcional)</label>
+          <input type="text" id="budget" placeholder="Ej: $2.000.000 COP / mes">
+        </div>
+      </div>
+
+      <!-- 4. PÚBLICO Y COMPETENCIA -->
+      <div class="form-card">
+        <div class="card-header">
+          <div class="card-icon emerald">👥</div>
+          <div><div class="card-title">Público y Competencia</div><div class="card-desc">Lo que ya sabes de tu mercado</div></div>
+        </div>
+        <div class="field">
+          <label>¿Quién es tu cliente ideal?</label>
+          <textarea id="audience" rows="2" placeholder="Ej: Adultos 25–55 años, estrato 4–6, El Poblado o Laureles. Extranjeros de turismo dental."></textarea>
+        </div>
+        <div class="field">
+          <label>¿Competidores directos? (si los conoces)</label>
+          <input type="text" id="competitors" placeholder="Ej: Clínica Viena, DentiOral, Dental Home">
+        </div>
+        <div class="field">
+          <label>¿Cuál es tu diferencial o ventaja competitiva?</label>
+          <input type="text" id="differentiator" placeholder="Ej: Especialistas con posgrado, tecnología 3D, ubicación premium">
+        </div>
+      </div>
+
+      <!-- 5. PERSONALIZACIÓN -->
+      <div class="form-card">
+        <div class="card-header">
+          <div class="card-icon amber">⚡</div>
+          <div><div class="card-title">Personalización del Informe</div><div class="card-desc">Secciones y enfoque especial</div></div>
+        </div>
+        <div class="field">
+          <span class="chips-label">¿Qué secciones quieres incluir?</span>
+          <div class="chips" id="sectionChips">
+            <div class="chip selected" data-val="Panorama del mercado">📊 Panorama mercado</div>
+            <div class="chip selected" data-val="Análisis de precios">💰 Precios</div>
+            <div class="chip selected" data-val="Análisis de competencia">🏆 Competencia</div>
+            <div class="chip selected" data-val="Público objetivo y buyer personas">👥 Público objetivo</div>
+            <div class="chip selected" data-val="Estrategia de pauta y canales">📣 Estrategia pauta</div>
+            <div class="chip selected" data-val="Banco de palabras clave">🔑 Keywords</div>
+            <div class="chip selected" data-val="Mensajes publicitarios">💬 Copy y mensajes</div>
+            <div class="chip" data-val="Análisis DOFA">⚖️ DOFA</div>
+            <div class="chip" data-val="Estimación de inversión y ROI">📈 ROI estimado</div>
+            <div class="chip" data-val="Tendencias del sector 2025-2026">🔭 Tendencias</div>
+          </div>
+        </div>
+        <div class="field" style="margin-top:12px">
+          <label>Algo más que quieras incluir o enfatizar</label>
+          <textarea id="extras" rows="2" placeholder="Ej: Enfatizar turismo dental internacional. Incluir datos en USD."></textarea>
+        </div>
+      </div>
+
+      <!-- 6. API KEY -->
+      <div class="form-card">
+        <div class="card-header">
+          <div class="card-icon red">🔐</div>
+          <div><div class="card-title">API Key de Anthropic</div><div class="card-desc">Necesaria para generar. No se almacena en ningún servidor.</div></div>
+        </div>
+        <div class="field">
+          <label>API Key (empieza con <code style="background:var(--surface2);padding:1px 6px;border-radius:4px;font-size:11px;color:var(--text-dim)">sk-ant-</code>)</label>
+          <div style="position:relative">
+            <input type="password" id="apiKeyInput" placeholder="sk-ant-api03-..." autocomplete="off" style="padding-right:42px">
+            <button onclick="toggleKey()" id="eyeBtn" style="position:absolute;right:9px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:15px;line-height:1;padding:4px;">👁</button>
+          </div>
+        </div>
+        <div class="key-hint">
+          🔒 Tu key solo se usa localmente para llamar a la API de Anthropic. Obtén la tuya en <a href="https://platform.claude.com/settings/keys" target="_blank">platform.claude.com</a>
+        </div>
+      </div>
+
+      <!-- SUBMIT -->
+      <div class="submit-area">
+        <div class="error-box" id="errorBox"></div>
+        <button class="btn-generate" id="generateBtn" onclick="generateReport()">
+          <span>⚡</span> Generar Investigación de Mercado
+        </button>
+      </div>
+    </div>
+
+    <!-- RESULT VIEW -->
+    <div class="result-area" id="resultView">
+
+      <!-- DOWNLOAD BAR — always visible, sticky at top -->
+      <div class="download-bar">
+        <div class="dl-info">
+          <div class="dl-check">✅</div>
+          <div>
+            <span class="dl-name" id="dlName">Investigación generada</span>
+            <span class="dl-sub" id="dlSub">Lista para descargar</span>
+          </div>
+        </div>
+        <div class="dl-actions">
+          <button class="btn-new" onclick="newReport()">➕ Nueva</button>
+          <button class="btn-open" onclick="openReport()">🔗 Nueva pestaña</button>
+          <button class="btn-download" onclick="downloadReport()">
+            ⬇️ Descargar HTML
+          </button>
+        </div>
+      </div>
+
+      <!-- IFRAME preview -->
+      <div class="result-iframe-wrap">
+        <iframe id="resultFrame" title="Investigación de Mercado"></iframe>
+      </div>
+
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<!-- LOADING -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="loading-ring"></div>
+  <div class="loading-title">Generando investigación…</div>
+  <div class="loading-msg">Analizando el mercado con inteligencia artificial</div>
+  <div class="loading-steps">
+    <div class="loading-step" id="ls1"><span class="step-check">⏳</span> Procesando datos del cliente</div>
+    <div class="loading-step" id="ls2"><span class="step-check">⏳</span> Investigando el mercado</div>
+    <div class="loading-step" id="ls3"><span class="step-check">⏳</span> Analizando competencia y precios</div>
+    <div class="loading-step" id="ls4"><span class="step-check">⏳</span> Redactando estrategia de pauta</div>
+    <div class="loading-step" id="ls5"><span class="step-check">⏳</span> Construyendo banco de keywords</div>
+    <div class="loading-step" id="ls6"><span class="step-check">⏳</span> Formateando informe HTML</div>
+  </div>
+</div>
+
+<script>
+let generatedHTML='',clientNameGlobal='',cityGlobal='';
+let history=[];
+
+function toggleSidebar(){
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebarOverlay').classList.toggle('open');
+}
+function closeSidebar(){
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebarOverlay').classList.remove('open');
+}
+function toggleKey(){
+  const i=document.getElementById('apiKeyInput'),b=document.getElementById('eyeBtn');
+  i.type=i.type==='password'?'text':'password';
+  b.textContent=i.type==='password'?'👁':'🙈';
+}
+
+document.querySelectorAll('.chips').forEach(g=>{
+  g.querySelectorAll('.chip').forEach(c=>{
+    c.addEventListener('click',()=>c.classList.toggle('selected'));
+  });
+});
+function getChips(id){
+  return[...document.querySelectorAll(`#${id} .chip.selected`)].map(c=>c.dataset.val).join(', ');
+}
+
+function setStep(n,state){
+  const el=document.getElementById('ls'+n);if(!el)return;
+  el.className='loading-step '+state;
+  el.querySelector('.step-check').textContent=state==='active'?'⚙️':state==='done'?'✅':'⏳';
+}
+function animateSteps(){
+  [0,1200,2800,5000,7500,10000].forEach((d,i)=>{
+    setTimeout(()=>{
+      for(let j=1;j<=6;j++){
+        if(j<i+1)setStep(j,'done');
+        else if(j===i+1)setStep(j,'active');
+      }
+    },d);
+  });
+}
+
+async function generateReport(){
+  const errBox=document.getElementById('errorBox');
+  errBox.classList.remove('visible');
+  const apiKey=document.getElementById('apiKeyInput').value.trim();
+  if(!apiKey||!apiKey.startsWith('sk-ant-')){
+    errBox.textContent='🔐 Ingresa una API Key válida de Anthropic (debe empezar con sk-ant-).';
+    errBox.classList.add('visible');return;
+  }
+  const name=document.getElementById('clientName').value.trim();
+  const city=document.getElementById('clientCity').value.trim();
+  const sector=document.getElementById('clientSector').value.trim();
+  const services=document.getElementById('services').value.trim();
+  if(!name||!city||!sector||!services){
+    errBox.textContent='⚠️ Completa al menos: nombre, ciudad, sector y servicios.';
+    errBox.classList.add('visible');return;
+  }
+  clientNameGlobal=name;cityGlobal=city;
+  const desc=document.getElementById('clientDesc').value.trim();
+  const star=document.getElementById('starService').value.trim();
+  const audience=document.getElementById('audience').value.trim();
+  const competitors=document.getElementById('competitors').value.trim();
+  const diff=document.getElementById('differentiator').value.trim();
+  const budget=document.getElementById('budget').value.trim();
+  const extras=document.getElementById('extras').value.trim();
+  const pautaType=getChips('pautaChips');
+  const channels=getChips('channelChips');
+  const sections=getChips('sectionChips');
+
+  document.getElementById('loadingOverlay').classList.add('visible');
+  document.getElementById('generateBtn').disabled=true;
+  animateSteps();
+
+  const today=new Date().toLocaleDateString('es-CO',{year:'numeric',month:'long',day:'numeric'});
+
+  const prompt=`Eres un experto en marketing digital, investigación de mercados y estrategia publicitaria.
+Genera una investigación de mercado SÚPER COMPLETA y PROFESIONAL en HTML.
+
+DATOS DEL CLIENTE:
+- Negocio: ${name}
+- Ciudad/Zona: ${city}
+- Sector: ${sector}
+- Descripción: ${desc||'No especificada'}
+- Servicios: ${services}
+- Servicio estrella: ${star||'No especificado'}
+- Diferencial: ${diff||'No especificado'}
+
+OBJETIVO DE MARKETING:
+- Tipo de pauta: ${pautaType}
+- Canales: ${channels}
+- Presupuesto: ${budget||'No especificado'}
+
+PÚBLICO Y COMPETENCIA:
+- Público objetivo: ${audience||'No especificado'}
+- Competidores: ${competitors||'No especificados (investigar y sugerir)'}
+
+SECCIONES REQUERIDAS: ${sections}
+${extras?`INSTRUCCIONES ADICIONALES: ${extras}`:''}
+
+FORMATO HTML REQUERIDO:
+- HTML completo y autónomo con CSS interno en <style>
+- Diseño profesional: azul oscuro (#0d1b4b), azul medio (#1a3a8f), acentos brillantes
+- Google Fonts Inter
+- Header/portada con gradiente profesional
+- Tablas de precios formateadas
+- Tarjetas de competidores
+- Tags/chips de colores para keywords
+- Segmentos de audiencia en tarjetas
+- Funnel de conversión visual
+- Estadísticas en tarjetas destacadas
+- Copy y mensajes listos para anuncios
+- DISEÑO 100% RESPONSIVO para móvil y desktop
+- Contenido REAL del mercado de ${city} en ${sector}
+- Datos y precios reales del mercado colombiano
+- Contenido extenso y detallado por sección
+- Fecha: ${today}
+- Solo HTML puro, sin markdown
+- Cerrar correctamente con </body></html>`;
+
+  try{
+    const resp=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:16000,messages:[{role:'user',content:prompt}]})
+    });
+    const data=await resp.json();
+    if(!resp.ok)throw new Error(data.error?.message||'Error en la API');
+    let html=data.content.map(b=>b.text||'').join('');
+    html=html.replace(/```html\s*/gi,'').replace(/```\s*/g,'').trim();
+    const s=html.search(/<!DOCTYPE|<html/i);
+    if(s>0)html=html.slice(s);
+    generatedHTML=html;
+    history.unshift({name,city,sector,date:today,html});
+    renderHistory();
+    for(let i=1;i<=6;i++)setStep(i,'done');
+    setTimeout(()=>{
+      document.getElementById('loadingOverlay').classList.remove('visible');
+      document.getElementById('generateBtn').disabled=false;
+      showResult();
+    },600);
+  }catch(err){
+    document.getElementById('loadingOverlay').classList.remove('visible');
+    document.getElementById('generateBtn').disabled=false;
+    errBox.textContent='❌ Error: '+err.message+'. Intenta de nuevo.';
+    errBox.classList.add('visible');
+  }
+}
+
+function showResult(){
+  document.getElementById('formView').style.display='none';
+  const rv=document.getElementById('resultView');
+  rv.classList.add('visible');
+  document.getElementById('dlName').textContent=clientNameGlobal||'Investigación generada';
+  document.getElementById('dlSub').textContent=(cityGlobal?cityGlobal+' · ':'')+new Date().toLocaleDateString('es-CO');
+  document.querySelectorAll('.step-item').forEach(s=>s.classList.remove('active'));
+  document.getElementById('nav-4').classList.add('active');
+  for(let i=1;i<=3;i++){document.getElementById('dot-'+i).textContent='✓';document.getElementById('nav-'+i).classList.add('done');}
+  const iframe=document.getElementById('resultFrame');
+  const blob=new Blob([generatedHTML],{type:'text/html'});
+  iframe.src=URL.createObjectURL(blob);
+  closeSidebar();
+}
+
+function newReport(){
+  document.getElementById('formView').style.display='block';
+  document.getElementById('resultView').classList.remove('visible');
+  document.querySelectorAll('.step-item').forEach((s,i)=>{s.classList.remove('active','done');if(i===0)s.classList.add('active');});
+  for(let i=1;i<=4;i++){const d=document.getElementById('dot-'+i);if(d)d.textContent=i;}
+  generatedHTML='';clientNameGlobal='';cityGlobal='';
+}
+
+function downloadReport(){
+  if(!generatedHTML)return;
+  const blob=new Blob([generatedHTML],{type:'text/html'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  const safe=(clientNameGlobal||'investigacion').replace(/\s+/g,'_').replace(/[^a-zA-Z0-9_\-]/g,'');
+  a.download=`investigacion_mercado_${safe}.html`;
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+}
+
+function openReport(){
+  if(!generatedHTML)return;
+  const blob=new Blob([generatedHTML],{type:'text/html'});
+  window.open(URL.createObjectURL(blob),'_blank');
+}
+
+function renderHistory(){
+  const el=document.getElementById('historyList');
+  if(!history.length){el.innerHTML='<div class="history-empty">No hay investigaciones previas</div>';return;}
+  el.innerHTML=history.map((h,i)=>`<div class="history-item" onclick="loadFromHistory(${i})"><div class="hist-name">${h.name}</div><div class="hist-date">${h.city} · ${h.date}</div></div>`).join('');
+}
+
+function loadFromHistory(i){
+  generatedHTML=history[i].html;
+  clientNameGlobal=history[i].name;
+  cityGlobal=history[i].city;
+  showResult();
+}
+</script>
+</body>
+</html>
