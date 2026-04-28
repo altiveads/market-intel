@@ -328,13 +328,13 @@ select option{background:var(--surface2);}
         <div class="home-hero">
           <div class="home-eyebrow">Bienvenido a ALTIVE Suite</div>
           <div class="home-title">TUS TOOLS<br>DE IA</div>
-          <p class="home-sub">Herramientas diseñadas para hacer más en menos tiempo. Investigación de mercado, estrategia de pauta, y más — todo en un solo lugar.</p>
+          <p class="home-sub">Herramientas diseñadas para hacer más en menos tiempo. Investigación de mercado, estrategia publicitaria, y más — todo en un solo lugar.</p>
         </div>
         <div class="tools-grid">
           <div class="tool-card blue" onclick="showView('research')">
             <div class="tool-card-icon blue">🔍</div>
             <h3>Investigación de Mercado</h3>
-            <p>Genera un informe profesional completo de cualquier mercado, sector y ciudad. Análisis de competencia, precios, público objetivo, keywords y estrategia de pauta.</p>
+            <p>Genera un informe profesional completo de cualquier mercado, sector y ciudad. Análisis de demanda, competencia, precios, segmentos, hallazgos e insights estratégicos.</p>
             <div class="tool-card-tags">
               <span class="ttag">Análisis de mercado</span>
               <span class="ttag">Competencia</span>
@@ -396,32 +396,6 @@ select option{background:var(--surface2);}
         </div>
 
         <div class="fcard">
-          <div class="fcard-header"><div class="fcard-icon fi-green">📣</div><div><div class="fcard-title">Objetivo de Marketing</div><div class="fcard-desc">Para qué usarás esta investigación</div></div></div>
-          <div class="field">
-            <span class="chips-label">Tipo de pauta</span>
-            <div class="chips" id="r-pauta">
-              <div class="chip selected" data-val="Pauta local (Google Ads + Meta Ads)">📍 Pauta local</div>
-              <div class="chip" data-val="SEO y contenido">📝 SEO</div>
-              <div class="chip" data-val="Pauta nacional">🇨🇴 Nacional</div>
-              <div class="chip" data-val="Pauta internacional">✈️ Internacional</div>
-              <div class="chip" data-val="Email marketing">📧 Email</div>
-              <div class="chip" data-val="Branding">🎨 Branding</div>
-            </div>
-          </div>
-          <div class="field">
-            <span class="chips-label">Canales</span>
-            <div class="chips" id="r-canales">
-              <div class="chip selected" data-val="Google Ads">Google Ads</div>
-              <div class="chip selected" data-val="Meta Ads">Meta Ads</div>
-              <div class="chip" data-val="TikTok Ads">TikTok</div>
-              <div class="chip" data-val="WhatsApp Business">WhatsApp</div>
-              <div class="chip" data-val="LinkedIn Ads">LinkedIn</div>
-            </div>
-          </div>
-          <div class="field"><label>Presupuesto mensual (opcional)</label><input type="text" id="r-budget" placeholder="Ej: $2.000.000 COP / mes"></div>
-        </div>
-
-        <div class="fcard">
           <div class="fcard-header"><div class="fcard-icon fi-amber">👥</div><div><div class="fcard-title">Público y Competencia</div><div class="fcard-desc">Lo que ya sabes del mercado</div></div></div>
           <div class="field"><label>Cliente ideal</label><textarea id="r-audience" rows="2" placeholder="Ej: Adultos 25–55 años, estrato 4–6, El Poblado o Laureles."></textarea></div>
           <div class="field"><label>Competidores conocidos</label><input type="text" id="r-comp" placeholder="Ej: Clínica Viena, DentiOral, Dental Home"></div>
@@ -437,7 +411,7 @@ select option{background:var(--surface2);}
               <div class="chip selected" data-val="Análisis de precios">💰 Precios</div>
               <div class="chip selected" data-val="Análisis de competencia">🏆 Competencia</div>
               <div class="chip selected" data-val="Público objetivo y buyer personas">👥 Audiencias</div>
-              <div class="chip selected" data-val="Estrategia de pauta y canales">📣 Estrategia</div>
+              <div class="chip selected" data-val="Implicaciones estratégicas">📣 Implicaciones</div>
               <div class="chip selected" data-val="Banco de palabras clave">🔑 Keywords</div>
               <div class="chip selected" data-val="Mensajes publicitarios y copys">💬 Copys</div>
               <div class="chip" data-val="Análisis DOFA">⚖️ DOFA</div>
@@ -960,45 +934,123 @@ async function generateResearch(){
   const services=document.getElementById('r-services').value.trim();
   if(!name||!city||!sector||!services){err.textContent='⚠️ Completa al menos: nombre, ciudad, sector y servicios.';err.classList.add('visible');return;}
   const today=new Date().toLocaleDateString('es-CO',{year:'numeric',month:'long',day:'numeric'});
-  const prompt=`Eres un experto en marketing digital e investigación de mercados. Genera una investigación de mercado SÚPER COMPLETA en HTML autónomo y profesional.
+  const prompt=`Eres un Director Senior de Market Intelligence con estándares de consultoría de primer nivel. Trabajas para la agencia Altive.
 
-DATOS DEL CLIENTE:
-- Negocio: ${name}
+Tu tarea es generar una investigación de mercado profunda, ejecutiva y accionable para ${name}, usando la misma lógica estratégica del SEO Tool de Altive, pero entregada como un HTML completo y visual.
+
+REGLAS ABSOLUTAS:
+- Español colombiano profesional.
+- Separa hechos, estimaciones e inferencias. Cuando no puedas confirmar un dato, márcalo como "(inferido del sector)".
+- No inventes datos específicos como si fueran verificados. Usa rangos, señales y estimados razonables del sector.
+- Prioriza claridad, profundidad, accionabilidad y utilidad para decisiones comerciales.
+- El informe debe servir tanto para agencia como para cliente: incluir análisis profundo y también explicación clara.
+- No devuelvas JSON. Devuelve únicamente HTML completo.
+
+DATOS DEL NEGOCIO:
+- Nombre: ${name}
 - Ciudad/Zona: ${city}
+- País: Colombia, salvo que el usuario indique otra cosa en ciudad/zona.
 - Sector: ${sector}
-- Descripción: ${document.getElementById('r-desc').value||'No especificada'}
-- Servicios: ${services}
-- Servicio estrella: ${document.getElementById('r-star').value||'No especificado'}
-- Diferencial: ${document.getElementById('r-diff').value||'No especificado'}
-- Público objetivo: ${document.getElementById('r-audience').value||'No especificado'}
-- Competidores: ${document.getElementById('r-comp').value||'Investigar y sugerir'}
-- Tipo de pauta: ${getChips('r-pauta')}
-- Canales: ${getChips('r-canales')}
-- Presupuesto: ${document.getElementById('r-budget').value||'No especificado'}
-- Secciones: ${getChips('r-secciones')}
-${document.getElementById('r-extras').value?'- Extras: '+document.getElementById('r-extras').value:''}
+- Descripción: ${document.getElementById('r-desc').value||'(no especificada)'}
+- Servicios principales: ${services}
+- Servicio estrella o mayor ticket: ${document.getElementById('r-star').value||'(no especificado)'}
+- Ticket/promedio o referencia de precio: ${document.getElementById('r-star').value||'(no especificado)'}
+- Diferencial percibido: ${document.getElementById('r-diff').value||'(no especificado)'}
+- Público objetivo inicial: ${document.getElementById('r-audience').value||'(no especificado)'}
+- Competidores conocidos: ${document.getElementById('r-comp').value||'detectar del sector'}
+- Secciones solicitadas por el usuario: ${getChips('r-secciones')}
+- Notas internas o instrucciones adicionales: ${document.getElementById('r-extras').value||'ninguna'}
+
+ESTRUCTURA DE INVESTIGACIÓN OBLIGATORIA:
+
+## 1. RESUMEN EJECUTIVO
+- 2 a 3 párrafos breves con diagnóstico del mercado y oportunidad principal.
+- 5 hallazgos clave en bullets.
+- Un callout tipo "Hallazgo central" con la conclusión más importante.
+
+## 2. CONTEXTO DEL NEGOCIO
+- Explica qué tipo de negocio es ${name}, qué problema comercial intenta resolver y cómo compite en ${city}.
+- Incluye un "problem statement" concreto.
+- Indica qué supuestos estás haciendo cuando falte información.
+
+## 3. METODOLOGÍA Y ALCANCE
+- Objetivo general de la investigación.
+- 3 a 5 objetivos específicos.
+- 4 preguntas de investigación.
+- Alcance: qué incluye y qué excluye.
+- Limitaciones metodológicas, especialmente sobre datos no verificables.
+
+## 4. ANÁLISIS DEL MERCADO
+- Tamaño y dinámica del mercado local para ${sector} en ${city}, usando rangos e inferencias responsables.
+- Evolución reciente y perspectivas.
+- 5 tendencias con impacto Alta/Media/Baja.
+- 4 drivers de crecimiento.
+- 3 barreras de entrada o crecimiento.
+- Callout de "Dinámica clave".
+
+## 5. ANÁLISIS DE DEMANDA
+- Cómo decide el consumidor, qué lo motiva y qué lo frena.
+- 3 segmentos de demanda con necesidades y urgencia.
+- Motivaciones, miedos, criterios de decisión y objeciones.
+- Buyer personas accionables si el contexto lo permite.
+- Callout de "Driver emocional".
+
+## 6. ANÁLISIS COMPETITIVO
+- Lectura del panorama competitivo de ${city}.
+- Mínimo 5 competidores o arquetipos competitivos si no hay nombres suficientes.
+- Para cada competidor: posicionamiento, oferta, fortaleza, debilidad y amenaza Alta/Media/Baja.
+- Gaps del mercado y espacios desatendidos.
+- Callout de "Espacio de oportunidad".
+
+## 7. ANÁLISIS DE PRECIOS Y OFERTA
+- Rango estimado de precios por servicio cuando aplique.
+- Tabla por servicio con precio bajo/medio/alto, percepción de valor y recomendación.
+- Qué ofertas o paquetes podrían aumentar conversión sin deteriorar posicionamiento.
+- Si no hay datos firmes, declarar que son rangos inferidos del sector.
+
+## 8. KEY FINDINGS
+- 6 hallazgos concretos.
+- Para cada hallazgo: evidencia/señal, implicación para el negocio y acción sugerida.
+
+## 9. STRATEGIC INSIGHTS
+- 5 insights estratégicos.
+- Clasifícalos por tipo: tensión de mercado, oportunidad, driver emocional, barrera invisible, error competitivo o ventaja explotable.
+- Explica qué hacer con cada insight.
+
+## 10. RECOMENDACIONES
+- 6 recomendaciones concretas.
+- Para cada recomendación: tipo, por qué ahora, impacto esperado, prioridad Alta/Media/Baja y riesgo/condición.
+- Deben ser aplicables a mercado, oferta, posicionamiento, comunicación, contenido y conversión.
+
+## 11. IMPLICACIONES ESTRATÉGICAS
+- Traduce la investigación a decisiones de negocio, posicionamiento, oferta, experiencia y crecimiento.
+- Indica qué mensajes de mercado deberían validarse.
+- Indica qué segmentos de demanda priorizar.
+- Incluye hipótesis comerciales y de comunicación sin convertir esto en una estrategia publicitaria.
+
+## 12. PRÓXIMOS PASOS
+- 4 a 6 próximos pasos operativos.
+- Roadmap simple de 30 días.
+- Qué información adicional debería validar la agencia antes de ejecutar.
 
 FORMATO HTML REQUERIDO:
-- HTML completo autónomo con CSS interno en <style>
-- Google Fonts incluida
-- Diseño: azul oscuro (#0d1b4b), azul medio (#1a3a8f), acentos brillantes
-- Header con gradiente profesional y fecha ${today}
-- Tablas de precios formateadas por servicio
-- Tarjetas de competidores con análisis
-- Tags de colores para keywords (alta/media/cola larga/negativas)
-- Segmentos de audiencia en tarjetas (local/nacional/internacional si aplica)
-- Funnel de conversión visual
-- Estadísticas en tarjetas con números grandes
-- Copys y mensajes listos para anuncios por servicio
-- 100% responsivo para móvil y desktop
-- Contenido REAL y específico del mercado de ${city} en ${sector}
-- Datos y precios reales del mercado colombiano
-- Contenido EXTENSO y DETALLADO por sección
-- Solo HTML puro, sin markdown
-- Cerrar con </body></html>`;
+- HTML completo autónomo con CSS interno en <style>.
+- Google Fonts incluida.
+- Diseño premium consistente con ALTIVE Suite: fondo oscuro #080810, cards oscuras, acentos azul #4361ee, verde #2ec4b6, rojo #e63946 y amarillo #f9c74f.
+- Header ejecutivo con nombre del negocio, ciudad, sector y fecha ${today}.
+- Índice visual de secciones.
+- Cards para hallazgos, insights y recomendaciones.
+- Tablas para competencia, precios, segmentos, tendencias y próximos pasos.
+- Tags visuales para impacto/prioridad/amenaza.
+- Callouts destacados con borde de color.
+- Números grandes o métricas estimadas cuando aplique.
+- 100% responsivo para móvil y desktop.
+- Contenido EXTENSO, DETALLADO y accionable.
+- Solo HTML puro, sin markdown.
+- Cerrar con </body></html>.`;
 
   document.getElementById('r-btn').disabled=true;
-  showLoading('GENERANDO INVESTIGACIÓN',['Procesando datos del cliente','Analizando el mercado y competencia','Construyendo análisis de precios','Redactando estrategia de pauta','Generando banco de keywords','Formateando informe profesional']);
+  showLoading('GENERANDO INVESTIGACIÓN',['Procesando datos del cliente','Analizando mercado y competencia','Construyendo análisis de demanda y precios','Detectando hallazgos e insights','Redactando recomendaciones estratégicas','Formateando informe profesional']);
   animSteps(6,[0,1500,3500,6000,9000,12000]);
   try{
     const html=await callClaude(prompt,apiKey);
