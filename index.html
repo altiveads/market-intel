@@ -98,11 +98,13 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .tool-card::before{content:'';position:absolute;inset:0;opacity:0;transition:opacity 0.2s;pointer-events:none;}
 .tool-card.blue::before{background:radial-gradient(circle at 0% 0%,rgba(67,97,238,0.08),transparent 70%);}
 .tool-card.red::before{background:radial-gradient(circle at 0% 0%,rgba(230,57,70,0.08),transparent 70%);}
+.tool-card.green::before{background:radial-gradient(circle at 0% 0%,rgba(46,196,182,0.08),transparent 70%);}
 .tool-card:hover{border-color:var(--border2);transform:translateY(-2px);}
 .tool-card:hover::before{opacity:1;}
 .tool-card-icon{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:16px;}
 .tool-card-icon.blue{background:rgba(67,97,238,0.15);border:1px solid rgba(67,97,238,0.25);}
 .tool-card-icon.red{background:rgba(230,57,70,0.12);border:1px solid rgba(230,57,70,0.2);}
+.tool-card-icon.green{background:rgba(46,196,182,0.12);border:1px solid rgba(46,196,182,0.22);}
 .tool-card h3{font-size:17px;font-weight:600;margin-bottom:6px;color:var(--text);}
 .tool-card p{font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:16px;}
 .tool-card-tags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px;}
@@ -291,6 +293,11 @@ select option{background:var(--surface2);}
         <span>Estrategia Meta Ads</span>
         <span class="nav-badge">NEW</span>
       </div>
+      <div class="nav-item" id="nav-google" onclick="showView('google')">
+        <div class="nav-dot"></div>
+        <span>Estrategia Google Ads</span>
+        <span class="nav-badge">NEW</span>
+      </div>
     </nav>
     <div class="sidebar-bottom">
       <div class="api-status">
@@ -345,6 +352,18 @@ select option{background:var(--surface2);}
               <span class="ttag">Copys</span>
               <span class="ttag">Segmentación</span>
               <span class="ttag">Presupuesto</span>
+            </div>
+            <div class="tool-card-cta">Abrir herramienta →</div>
+          </div>
+          <div class="tool-card green" onclick="showView('google')">
+            <div class="tool-card-icon green">🔎</div>
+            <h3>Estrategia Google Ads</h3>
+            <p>Genera una estrategia de búsqueda con la lógica del SEO Tool: campañas por síntomas, servicios y marca, keywords, anuncios, extensiones, negativos y medición.</p>
+            <div class="tool-card-tags">
+              <span class="ttag">Google Ads</span>
+              <span class="ttag">Keywords</span>
+              <span class="ttag">Search</span>
+              <span class="ttag">Medición</span>
             </div>
             <div class="tool-card-cta">Abrir herramienta →</div>
           </div>
@@ -583,6 +602,149 @@ select option{background:var(--surface2);}
       </div>
     </div>
 
+    <!-- ══════════════════ GOOGLE ADS ══════════════════ -->
+    <div class="tool-view" id="view-google">
+      <div class="tool-content" id="googleForm">
+        <div class="section-head">
+          <h2>ESTRATEGIA GOOGLE ADS</h2>
+          <p>Carga tu investigación de mercado o completa los datos. La IA genera una estrategia Search con campañas por síntomas, servicios y marca, siguiendo la lógica del SEO Tool.</p>
+        </div>
+
+        <!-- CARGAR INVESTIGACIÓN -->
+        <div class="fcard">
+          <div class="fcard-header"><div class="fcard-icon fi-blue">📄</div><div><div class="fcard-title">Investigación de Mercado</div><div class="fcard-desc">Opcional: usa el HTML generado en esta suite como contexto</div></div></div>
+          <div class="file-drop" id="g-fileDrop" onclick="document.getElementById('g-fileInput').click()" ondragover="googleDragOver(event)" ondragleave="googleDragLeave(event)" ondrop="googleDropFile(event)">
+            <div class="file-drop-icon">📂</div>
+            <p id="g-fileDropText">Arrastra tu investigación de mercado aquí o haz clic para seleccionar</p>
+            <span id="g-fileDropSub">La estrategia usará datos de mercado, competidores y keywords</span>
+          </div>
+          <input type="file" id="g-fileInput" accept=".html" onchange="loadGoogleFile(event)" style="display:none">
+        </div>
+
+        <!-- DATOS BÁSICOS -->
+        <div class="fcard">
+          <div class="fcard-header"><div class="fcard-icon fi-green">🏢</div><div><div class="fcard-title">Datos del Cliente</div><div class="fcard-desc">Base para campañas, keywords y anuncios</div></div></div>
+          <div class="field"><label>Nombre del negocio *</label><input type="text" id="g-name" placeholder="Ej: Clínica de Implantes El Poblado"></div>
+          <div class="field-row">
+            <div class="field"><label>Ciudad / Zona *</label><input type="text" id="g-city" placeholder="Ej: Medellín — El Poblado"></div>
+            <div class="field"><label>Sector *</label><input type="text" id="g-sector" placeholder="Ej: Odontología estética"></div>
+          </div>
+          <div class="field-row">
+            <div class="field"><label>Servicio principal *</label><input type="text" id="g-service" placeholder="Ej: Implantes dentales"></div>
+            <div class="field"><label>Sitio web / landing</label><input type="text" id="g-website" placeholder="Ej: https://clinica.com/implantes"></div>
+          </div>
+          <div class="field"><label>Público objetivo</label><textarea id="g-audience" rows="2" placeholder="Ej: Adultos 35–65 años con intención de cotizar implantes en Medellín."></textarea></div>
+          <div class="field"><label>Diferencial o promesa responsable</label><input type="text" id="g-diff" placeholder="Ej: Especialistas certificados, tecnología 3D, financiación"></div>
+          <div class="field"><label>Competidores conocidos</label><input type="text" id="g-comp" placeholder="Ej: Clínica Viena, DentiOral, Dental Home"></div>
+        </div>
+
+        <!-- CALCULADORA DE PRESUPUESTO -->
+        <div class="fcard">
+          <div class="fcard-header"><div class="fcard-icon fi-amber">💰</div><div><div class="fcard-title">Calculadora Google Ads</div><div class="fcard-desc">Estimación inicial para Search en COP</div></div></div>
+          <div class="calc-grid">
+            <div class="calc-item">
+              <label>Presupuesto mensual (COP)</label>
+              <input type="text" id="g-budget" placeholder="2000000" oninput="calcGoogleBudget()" value="2000000">
+            </div>
+            <div class="calc-item">
+              <label>CPC estimado (COP)</label>
+              <input type="text" id="g-cpc" placeholder="3500" oninput="calcGoogleBudget()" value="3500">
+            </div>
+            <div class="calc-item">
+              <label>Tasa visita → lead (%)</label>
+              <input type="text" id="g-conv" placeholder="5" oninput="calcGoogleBudget()" value="5">
+            </div>
+            <div class="calc-item">
+              <label>Tasa cierre comercial (%)</label>
+              <input type="text" id="g-close" placeholder="30" oninput="calcGoogleBudget()" value="30">
+            </div>
+          </div>
+          <div class="calc-result">
+            <div class="calc-result-grid">
+              <div class="cr-item"><div class="cr-num" id="g-clicks">571</div><div class="cr-label">Clics/mes</div></div>
+              <div class="cr-item"><div class="cr-num" id="g-leads">29</div><div class="cr-label">Leads</div></div>
+              <div class="cr-item"><div class="cr-num" id="g-sales">9</div><div class="cr-label">Cierres</div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CONFIGURACIÓN ESTRATEGIA -->
+        <div class="fcard">
+          <div class="fcard-header"><div class="fcard-icon fi-purple">⚙️</div><div><div class="fcard-title">Configuración de la Estrategia</div><div class="fcard-desc">Estructura heredada del SEO Tool</div></div></div>
+          <div class="field">
+            <span class="chips-label">Objetivo principal</span>
+            <div class="chips" id="g-objetivo">
+              <div class="chip selected" data-val="Máximo tráfico calificado al sitio con intención comercial">🔎 Tráfico calificado</div>
+              <div class="chip selected" data-val="Generación de leads por formulario, llamada o WhatsApp">🎯 Leads</div>
+              <div class="chip" data-val="Llamadas desde anuncios y extensiones">📞 Llamadas</div>
+              <div class="chip" data-val="Defensa de marca frente a competidores">🛡️ Defensa de marca</div>
+            </div>
+          </div>
+          <div class="field">
+            <span class="chips-label">Campañas a incluir</span>
+            <div class="chips" id="g-campaigns">
+              <div class="chip selected" data-val="C1 Síntomas / Descubrimiento">C1 Síntomas</div>
+              <div class="chip selected" data-val="C2 Servicios / Comercial">C2 Servicios</div>
+              <div class="chip selected" data-val="C3 Marca / Defensa">C3 Marca</div>
+            </div>
+          </div>
+          <div class="field">
+            <span class="chips-label">Tipos de concordancia</span>
+            <div class="chips" id="g-match">
+              <div class="chip selected" data-val="Exacta">Exacta</div>
+              <div class="chip selected" data-val="Frase">Frase</div>
+              <div class="chip" data-val="Amplia controlada por smart bidding">Amplia controlada</div>
+            </div>
+          </div>
+          <div class="field">
+            <span class="chips-label">Conversiones a medir</span>
+            <div class="chips" id="g-conversions">
+              <div class="chip selected" data-val="Formulario enviado">Formulario</div>
+              <div class="chip selected" data-val="Clic en WhatsApp">WhatsApp</div>
+              <div class="chip selected" data-val="Clic en llamada">Llamada</div>
+              <div class="chip" data-val="Reserva de cita">Reserva</div>
+              <div class="chip" data-val="Vista de thank you page">Thank you page</div>
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label>CTA principal</label>
+              <input type="text" id="g-cta" placeholder="Ej: Agenda tu valoración">
+            </div>
+            <div class="field">
+              <label>Tono de anuncios</label>
+              <select id="g-tone">
+                <option value="Profesional, claro y orientado a conversión">Profesional y claro</option>
+                <option value="Cercano y empático, sin promesas absolutas">Cercano y empático</option>
+                <option value="Directo, comercial y enfocado en acción">Directo comercial</option>
+                <option value="Premium, experto y de alta confianza">Premium experto</option>
+              </select>
+            </div>
+          </div>
+          <div class="field"><label>Información adicional o restricciones</label><textarea id="g-extras" rows="2" placeholder="Ej: No prometer resultados garantizados. Priorizar landing de implantes."></textarea></div>
+        </div>
+
+        <div class="submit-area">
+          <div class="error-box" id="g-error"></div>
+          <button class="btn-generate" id="g-btn" onclick="generateGoogle()">⚡ GENERAR ESTRATEGIA GOOGLE ADS</button>
+        </div>
+      </div>
+      <div class="result-area" id="g-result">
+        <div class="result-bar">
+          <div class="result-bar-info">
+            <div class="result-check">✅</div>
+            <div><div class="result-name" id="g-result-name">ESTRATEGIA GENERADA</div><div class="result-sub" id="g-result-sub">Lista para implementar</div></div>
+          </div>
+          <div class="result-btns">
+            <button class="rbtn" onclick="backToForm('google')">← Nueva</button>
+            <button class="rbtn" onclick="openResult('google')">🔗 Nueva pestaña</button>
+            <button class="rbtn primary" onclick="downloadResult('google')">⬇️ Descargar HTML</button>
+          </div>
+        </div>
+        <div class="result-iframe-wrap"><iframe id="g-iframe" title="Estrategia Google Ads"></iframe></div>
+      </div>
+    </div>
+
   </div><!-- /main -->
 </div><!-- /app -->
 
@@ -596,8 +758,9 @@ select option{background:var(--surface2);}
 
 <script>
 /* ─── STATE ─── */
-let htmlResults = {research: '', meta: ''};
+let htmlResults = {research: '', meta: '', google: ''};
 let fileContent = '';
+let googleFileContent = '';
 let currentTool = '';
 
 /* ─── SIDEBAR ─── */
@@ -609,7 +772,7 @@ function toggleApiKey(){const i=document.getElementById('apiKeyGlobal');i.type=i
 function getApiKey(){return document.getElementById('apiKeyGlobal').value.trim();}
 
 /* ─── NAVIGATION ─── */
-const viewTitles={home:'Panel principal',research:'Investigación de Mercado',meta:'Estrategia Meta Ads'};
+const viewTitles={home:'Panel principal',research:'Investigación de Mercado',meta:'Estrategia Meta Ads',google:'Estrategia Google Ads'};
 function showView(v){
   document.querySelectorAll('.tool-view').forEach(el=>el.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(el=>el.classList.remove('active'));
@@ -641,6 +804,21 @@ function calcBudget(){
 }
 calcBudget();
 
+function parseMoney(v){return parseFloat(String(v).replace(/[^\d.]/g,''))||0;}
+function calcGoogleBudget(){
+  const budget=parseMoney(document.getElementById('g-budget').value)||0;
+  const cpc=parseMoney(document.getElementById('g-cpc').value)||3500;
+  const conv=(parseMoney(document.getElementById('g-conv').value)||5)/100;
+  const closeRate=(parseMoney(document.getElementById('g-close').value)||30)/100;
+  const clicks=Math.round(budget/cpc);
+  const leads=Math.round(clicks*conv);
+  const sales=Math.round(leads*closeRate);
+  document.getElementById('g-clicks').textContent=clicks||0;
+  document.getElementById('g-leads').textContent=leads||0;
+  document.getElementById('g-sales').textContent=sales||0;
+}
+calcGoogleBudget();
+
 /* ─── FILE UPLOAD ─── */
 function dragOver(e){e.preventDefault();document.getElementById('fileDrop').classList.add('dragover');}
 function dragLeave(e){document.getElementById('fileDrop').classList.remove('dragover');}
@@ -663,6 +841,40 @@ function readFile(file){
     if(!document.getElementById('m-name').value)document.getElementById('m-name').value=name;
   };
   reader.readAsText(file);
+}
+
+function googleDragOver(e){e.preventDefault();document.getElementById('g-fileDrop').classList.add('dragover');}
+function googleDragLeave(e){document.getElementById('g-fileDrop').classList.remove('dragover');}
+function googleDropFile(e){
+  e.preventDefault();googleDragLeave(e);
+  const file=e.dataTransfer.files[0];
+  if(file&&file.name.endsWith('.html'))readGoogleFile(file);
+}
+function loadGoogleFile(e){const file=e.target.files[0];if(file)readGoogleFile(file);}
+function readGoogleFile(file){
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    googleFileContent=ev.target.result;
+    const drop=document.getElementById('g-fileDrop');
+    drop.classList.add('file-loaded');
+    document.getElementById('g-fileDropText').textContent='✅ '+file.name+' cargado correctamente';
+    document.getElementById('g-fileDropSub').textContent='La IA extraerá contexto, competidores, precios y keywords';
+    const name=file.name.replace('investigacion_mercado_','').replace('.html','').replace(/_/g,' ');
+    if(!document.getElementById('g-name').value)document.getElementById('g-name').value=name;
+  };
+  reader.readAsText(file);
+}
+function htmlToPromptContext(html){
+  if(!html)return '';
+  const text=html
+    .replace(/<script[\s\S]*?<\/script>/gi,' ')
+    .replace(/<style[\s\S]*?<\/style>/gi,' ')
+    .replace(/<[^>]+>/g,' ')
+    .replace(/&nbsp;/g,' ')
+    .replace(/&amp;/g,'&')
+    .replace(/\s+/g,' ')
+    .trim();
+  return text.slice(0,25000);
 }
 
 /* ─── LOADING ─── */
@@ -724,7 +936,7 @@ function downloadResult(tool){
   const html=htmlResults[tool];if(!html)return;
   const blob=new Blob([html],{type:'text/html'});
   const a=document.createElement('a');
-  const prefix=tool==='research'?'investigacion_mercado':'estrategia_meta_ads';
+  const prefix=tool==='research'?'investigacion_mercado':tool==='google'?'estrategia_google_ads':'estrategia_meta_ads';
   a.href=URL.createObjectURL(blob);
   a.download=prefix+'_'+new Date().getTime()+'.html';
   document.body.appendChild(a);a.click();document.body.removeChild(a);
@@ -930,6 +1142,170 @@ IMPORTANTE: El informe debe ser EXTENSO, DETALLADO y completamente accionable. E
     setTimeout(()=>{hideLoading();document.getElementById('m-btn').disabled=false;showResult('meta',html,'ESTRATEGIA META ADS — '+name.toUpperCase(),city+' · '+service+' · '+today);},600);
   }catch(e){
     hideLoading();document.getElementById('m-btn').disabled=false;
+    err.textContent='❌ Error: '+e.message;err.classList.add('visible');
+  }
+}
+
+/* ─────────────────────────────────────
+   GOOGLE ADS STRATEGY
+───────────────────────────────────── */
+async function generateGoogle(){
+  const err=document.getElementById('g-error');err.classList.remove('visible');
+  const apiKey=getApiKey();
+  if(!apiKey||!apiKey.startsWith('sk-ant-')){err.textContent='🔐 Ingresa tu API Key de Anthropic en la barra superior.';err.classList.add('visible');return;}
+  const name=document.getElementById('g-name').value.trim();
+  const city=document.getElementById('g-city').value.trim();
+  const sector=document.getElementById('g-sector').value.trim();
+  const service=document.getElementById('g-service').value.trim();
+  if(!name||!city||!sector||!service){err.textContent='⚠️ Completa al menos: nombre, ciudad, sector y servicio principal.';err.classList.add('visible');return;}
+
+  const budget=parseMoney(document.getElementById('g-budget').value)||2000000;
+  const cpc=parseMoney(document.getElementById('g-cpc').value)||3500;
+  const conv=parseMoney(document.getElementById('g-conv').value)||5;
+  const closeRate=parseMoney(document.getElementById('g-close').value)||30;
+  const clicks=Math.round(budget/cpc);
+  const leads=Math.round(clicks*(conv/100));
+  const sales=Math.round(leads*(closeRate/100));
+  const today=new Date().toLocaleDateString('es-CO',{year:'numeric',month:'long',day:'numeric'});
+  const marketContext=htmlToPromptContext(googleFileContent);
+  const investigacion=marketContext?`\n\nINVESTIGACIÓN DE MERCADO CARGADA (úsala como fuente de contexto, no la copies literal):\n${marketContext}\n`:`\n\nINVESTIGACIÓN DE MERCADO CARGADA: No se cargó archivo. Investiga y deduce con criterio experto según ciudad, sector y servicio.\n`;
+
+  const prompt=`Eres un Google Ads Specialist senior certificado. Trabajas para la agencia Altive y debes generar una estrategia completa de Google Ads Search en HTML profesional y autónomo.
+
+La estrategia debe seguir la lógica del SEO Tool de Altive: máximo tráfico calificado al sitio, separación por intención de búsqueda, keywords accionables, anuncios listos para implementar, políticas, medición y negativos.
+${investigacion}
+DATOS DEL CLIENTE:
+- Negocio: ${name}
+- Ciudad/Zona: ${city}
+- Sector: ${sector}
+- Servicio principal: ${service}
+- Sitio web / landing: ${document.getElementById('g-website').value||'No especificado; proponer URL de destino ideal'}
+- Público objetivo: ${document.getElementById('g-audience').value||'No especificado'}
+- Diferencial: ${document.getElementById('g-diff').value||'No especificado'}
+- Competidores: ${document.getElementById('g-comp').value||'Investigar y sugerir'}
+- Objetivo: ${getChips('g-objetivo')}
+- Campañas requeridas: ${getChips('g-campaigns')}
+- Tipos de concordancia: ${getChips('g-match')}
+- Conversiones a medir: ${getChips('g-conversions')}
+- CTA principal: ${document.getElementById('g-cta').value||'Agenda tu valoración'}
+- Tono: ${document.getElementById('g-tone').value}
+- Restricciones o extras: ${document.getElementById('g-extras').value||'Ninguna'}
+
+CALCULADORA DE PRESUPUESTO:
+- Presupuesto mensual: $${budget.toLocaleString('es-CO')} COP
+- CPC estimado: $${cpc.toLocaleString('es-CO')} COP
+- Clics estimados: ${clicks}
+- Tasa visita a lead: ${conv}%
+- Leads estimados: ${leads}
+- Tasa cierre comercial: ${closeRate}%
+- Cierres estimados: ${sales}
+
+ESTRUCTURA ESTRATÉGICA OBLIGATORIA:
+
+## 1. TESIS ESTRATÉGICA
+Explica por qué Google Ads es adecuado para ${name}, cómo se conecta con intención de búsqueda y qué rol cumple frente a SEO, Meta Ads y remarketing.
+
+## 2. POLÍTICAS DE GOOGLE ADS
+Incluye mínimo 6 políticas o criterios de cumplimiento aplicables a ${sector}. Evita promesas absolutas, curas garantizadas, resultados irreales o lenguaje sensible.
+
+## 3. CAMPAÑAS SEARCH
+Genera exactamente estas 3 campañas:
+
+C1 - Síntomas / Descubrimiento
+- Intención: informacional con potencial de conversión.
+- Objetivo: capturar búsquedas de problema, dolor, síntoma o necesidad.
+- Presupuesto sugerido: 40%.
+- Mínimo 4 grupos de anuncios.
+- Cada grupo debe tener 5 keywords.
+- Incluir landing recomendada.
+- Incluir por qué existe cada grupo.
+
+C2 - Servicios / Comercial
+- Intención: comercial / transaccional.
+- Objetivo: capturar usuarios que ya buscan el servicio.
+- Presupuesto sugerido: 40%.
+- Mínimo 4 grupos de anuncios.
+- Cada grupo debe tener 5 keywords.
+- Incluir landing recomendada.
+- Incluir por qué existe cada grupo.
+
+C3 - Marca / Defensa
+- Intención: navegacional y defensa competitiva.
+- Objetivo: proteger marca y captar búsquedas comparativas.
+- Presupuesto sugerido: 20%.
+- Mínimo 2 grupos de anuncios.
+- Cada grupo debe tener 4 keywords.
+- Incluir landing recomendada.
+- Incluir por qué existe cada grupo.
+
+## 4. COPYS DE ANUNCIOS
+Para C1 y C2 genera por campaña:
+- 15 headlines, máximo 30 caracteres cada uno.
+- 4 descriptions, máximo 90 caracteres cada una.
+Para C3 genera:
+- 10 headlines, máximo 30 caracteres cada uno.
+- 2 descriptions, máximo 90 caracteres cada una.
+Los copys deben usar el CTA "${document.getElementById('g-cta').value||'Agenda tu valoración'}" cuando aplique, ser claros, humanos y cumplir políticas.
+
+## 5. EXTENSIONES / ASSETS
+Por campaña incluye mínimo:
+- 4 sitelinks con texto y URL sugerida.
+- 4 callouts.
+- 2 snippets estructurados.
+- Recomendación de llamada o ubicación si aplica.
+
+## 6. PRESUPUESTO Y ESCENARIOS
+Genera exactamente 3 escenarios:
+- Arranque.
+- Crecimiento.
+- Escala.
+Cada escenario debe incluir inversión total COP/mes, distribución C1/C2/C3, clics estimados, lógica estratégica y cuándo pasar al siguiente escenario.
+
+## 7. TARGETING Y CONFIGURACIÓN
+Incluye ubicaciones, radio sugerido, dispositivos, horarios, pujas, audiencias observación/RLSA y recomendaciones mobile-first.
+
+## 8. MEDICIÓN
+Incluye mínimo 6 eventos de conversión con categoría Primary/Secondary y trigger recomendado en GTM/GA4.
+Incluye stack: GA4, Google Tag Manager, Google Ads Conversion Tag, Google Business Profile y Looker Studio.
+
+## 9. NEGATIVOS
+Incluye:
+- 15 keywords negativas globales.
+- Negativos específicos por campaña.
+- Lógica de mantenimiento semanal.
+
+## 10. ROADMAP Y CHECKLIST
+Incluye roadmap de 4 semanas, checklist de lanzamiento y rutina de optimización semanal.
+
+FORMATO HTML REQUERIDO:
+- HTML completo autónomo con CSS interno en <style>.
+- Diseño oscuro premium consistente con ALTIVE Suite: fondo #080810, cards oscuras, acentos azul #4361ee, verde #2ec4b6 y rojo #e63946.
+- Google Fonts: Outfit o similar.
+- Secciones claramente diferenciadas.
+- Tablas para campañas, ad groups, keywords, presupuesto, eventos y negativos.
+- Tags visuales por intención: síntomas=azul, servicios=verde, marca=rojo.
+- Cards para escenarios de presupuesto y checklist.
+- Números grandes para clics, leads, cierres y presupuesto.
+- 100% responsivo móvil y desktop.
+- Fecha: ${today}.
+- Solo HTML puro, sin markdown.
+- Cerrar con </body></html>.
+
+IMPORTANTE:
+- El informe debe ser EXTENSO, DETALLADO y accionable.
+- No devuelvas JSON.
+- No menciones que eres IA.
+- Si el sector es salud, legal, financiero u otro sensible, usa lenguaje responsable y sin promesas absolutas.`;
+
+  document.getElementById('g-btn').disabled=true;
+  showLoading('GENERANDO ESTRATEGIA GOOGLE ADS',['Analizando intención de búsqueda y mercado','Estructurando campañas C1/C2/C3','Generando grupos de anuncios y keywords','Redactando headlines y descriptions','Calculando presupuesto y escenarios','Definiendo medición, negativos y assets','Armando roadmap de implementación','Formateando estrategia completa']);
+  animSteps(8,[0,1200,2800,4500,6500,8500,11000,13500]);
+  try{
+    const html=await callClaude(prompt,apiKey);
+    for(let i=0;i<8;i++)setStep(i,'done');
+    setTimeout(()=>{hideLoading();document.getElementById('g-btn').disabled=false;showResult('google',html,'ESTRATEGIA GOOGLE ADS — '+name.toUpperCase(),city+' · '+service+' · '+today);},600);
+  }catch(e){
+    hideLoading();document.getElementById('g-btn').disabled=false;
     err.textContent='❌ Error: '+e.message;err.classList.add('visible');
   }
 }
